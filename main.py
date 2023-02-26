@@ -1,19 +1,21 @@
 from io import BytesIO
+import sys
 import requests
 from PIL import Image
 from PIL import ImageDraw
-#t=sys.argv[1]
-#idk, some processing - as of rn we're assuming 100% goodwill from the user, and no errors
-url="https://en.wikipedia.org/static/images/icons/wikipedia.png"
-r=requests.get(url)
-img = Image.open(BytesIO(r.content))
-bubble = Image.new("RGBA",(img.width,100),(255,255,255,255))
-d = ImageDraw.Draw(bubble)
-d.ellipse(xy=(-50,-100,img.width+50,50),fill=(255,255,255,0),outline=(0,0,0,255),width=10)
-#TODO: speech bubble "arrows"
-#      math based angles on the ellipsis
-#      more might be coming, but that's after this part's done
-res = Image.new("RGBA",(img.width,bubble.height+img.height))
-res.paste(bubble)
-res.paste(img,(0,bubble.height))
-res.save("res.png")
+#as of rn we're assuming 100% goodwill from the user, and no errors
+source_image = Image.open(BytesIO(requests.get(sys.argv[1]).content))
+#additional handling for animated content?
+
+#higher level overview - make a speechbubble from pieslice and ellipse, but inverted - it's a mask for tranparency layer
+bubble_mask = Image.new("RGBA",(1000,1000),(255,255,255,255))
+bubble_mask_drawable = ImageDraw.Draw(bubble_mask)
+#in finalized version this will probably need custom inputs
+bubble_mask_drawable.pieslice(xy=(0,0,1000,750),start=270,end=280,fill=(255,255,255,0))
+bubble_mask_drawable.ellipse(xy=(-500,-1000,1500,150),fill=(255,255,255,0))
+bubble_mask = bubble_mask.resize((source_image.width,source_image.height),resample=Image.Resampling.NEAREST)
+transparent = Image.new("RGBA",(source_image.width,source_image.height),(255,255,255,0))
+result = Image.composite(source_image,transparent,bubble_mask)
+
+#how to handle output? termux's an issue
+result.save("res.gif")
