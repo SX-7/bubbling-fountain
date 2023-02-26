@@ -16,7 +16,6 @@ except UnidentifiedImageError:
 except:
     print("Error while parsing URL, or retrieving content")
     sys.exit(-3)
-#additional handling for animated content?
 
 output_frames =[]
 frame_length=[]
@@ -26,7 +25,7 @@ for frame in ImageSequence.Iterator(source_image):
     
     bubble_mask = Image.new("RGBA",(1000,1000),(255,255,255,255))
     bubble_mask_drawable = ImageDraw.Draw(bubble_mask)
-    #in finalized version this will probably need custom inputs
+    #in finalized version this will definitely need custom inputs - probably with curses lib
     bubble_mask_drawable.pieslice(xy=(0,0,1000,750),start=270,end=280,fill=(255,255,255,0))
     bubble_mask_drawable.ellipse(xy=(-500,-1000,1500,150),fill=(255,255,255,0))
     bubble_mask = bubble_mask.resize((source_image.width,source_image.height),resample=Image.Resampling.NEAREST)
@@ -38,4 +37,4 @@ for frame in ImageSequence.Iterator(source_image):
         frame_length.append(0)
 
 #how to handle output? termux's an issue
-output_frames[0].save("res.gif",save_all=True, append_images=output_frames[1:],loop=0,duration=frame_length)
+output_frames[0].save("res.gif",save_all=True, append_images=output_frames[1:],loop=0,duration=frame_length,optimize=True,disposal=2)
