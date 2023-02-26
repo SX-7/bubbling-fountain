@@ -6,7 +6,7 @@ from PIL import ImageDraw
 from PIL import UnidentifiedImageError
 from PIL import ImageSequence
 try:
-    source_image = Image.open(BytesIO(requests.get("https://media.tenor.com/wKNwPQiMz9EAAAAd/wtff-cat-confused-orange.gif").content))
+    source_image = Image.open(BytesIO(requests.get(sys.argv[1]).content))
 except IndexError:
     print("URL adress has not been provided")
     sys.exit(-1)
