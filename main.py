@@ -32,7 +32,10 @@ for frame in ImageSequence.Iterator(source_image):
     bubble_mask = bubble_mask.resize((source_image.width,source_image.height),resample=Image.Resampling.NEAREST)
     transparent = Image.new("RGBA",(source_image.width,source_image.height),(255,255,255,0))
     output_frames.append(Image.composite(frame,transparent,bubble_mask))
-    frame_length.append(frame.info['duration'])
+    try:
+        frame_length.append(frame.info['duration'])
+    except:
+        frame_length.append(0)
 
 #how to handle output? termux's an issue
 output_frames[0].save("res.gif",save_all=True, append_images=output_frames[1:],loop=0,duration=frame_length)
