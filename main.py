@@ -3,8 +3,18 @@ import sys
 import requests
 from PIL import Image
 from PIL import ImageDraw
-#as of rn we're assuming 100% goodwill from the user, and no errors
-source_image = Image.open(BytesIO(requests.get(sys.argv[1]).content))
+from PIL import UnidentifiedImageError
+try:
+    source_image = Image.open(BytesIO(requests.get(sys.argv[1]).content))
+except IndexError:
+    print("URL adress has not been provided")
+    sys.exit(-1)
+except UnidentifiedImageError:
+    print("File at the URL adress is not an image file")
+    sys.exit(-2)
+except:
+    print("Error while parsing URL, or retrieving content")
+    sys.exit(-3)
 #additional handling for animated content?
 
 #higher level overview - make a speechbubble from pieslice and ellipse, but inverted - it's a mask for tranparency layer
