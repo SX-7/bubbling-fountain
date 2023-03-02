@@ -1,4 +1,5 @@
 from io import BytesIO
+import math
 import sys
 import requests
 from PIL import Image
@@ -9,7 +10,7 @@ import curses
 import numpy
 try:
     source_image = Image.open(BytesIO(requests.get(sys.argv[1]).content))
-    
+
 except IndexError:
     print("URL adress has not been provided")
     sys.exit(-1)
@@ -90,7 +91,8 @@ def main(stdscr):
     # Repeat it for direction (along top line), and height
     position_set = False
     director_position_x = int((thumbnail_array.shape[1]-1)/2)
-    director_position_y = int(pointed_position[1]*(thumbnail_array.shape[0]-2)/2)
+    director_position_y = int(
+        pointed_position[1]*(thumbnail_array.shape[0]-2)/2)
     while not position_set:
         stdscr.clear()
         for iterator_x in range(thumbnail_array.shape[0]-1):
@@ -99,16 +101,19 @@ def main(stdscr):
                     thumbnail_array[iterator_x, iterator_y]+1))
         # we have to draw the cursor *with* the line outgoing from the previous pos
         # make a list of coordinates that'll be used to draw, arbitrairly 10
-        marker_positions=[]
-        marker_positions_direction_vector=((pointed_position[1]*(thumbnail_array.shape[0]-2))/10,((pointed_position[0]*(thumbnail_array.shape[1]-2))-director_position_x)/10)
-        for offset_index in range(0,11):
-            marker_positions.append((marker_positions_direction_vector[0]*offset_index,marker_positions_direction_vector[1]*offset_index))
+        marker_positions = []
+        marker_positions_direction_vector = ((pointed_position[1]*(thumbnail_array.shape[0]-2))/10, ((
+            pointed_position[0]*(thumbnail_array.shape[1]-2))-director_position_x)/10)
+        for offset_index in range(0, 11):
+            marker_positions.append(
+                (marker_positions_direction_vector[0]*offset_index, marker_positions_direction_vector[1]*offset_index))
         for current_marker_offset_vector in marker_positions:
             stdscr.addstr(int(current_marker_offset_vector[0]), int(current_marker_offset_vector[1]+director_position_x), "X",
-                      curses.color_pair(color_palette_size+1))
+                          curses.color_pair(color_palette_size+1))
         # now draw horizontal line for speechbubble height
         for line_x in range(thumbnail_array.shape[1]-1):
-            stdscr.addstr(director_position_y, line_x, "X",curses.color_pair(color_palette_size+1))
+            stdscr.addstr(director_position_y, line_x, "X",
+                          curses.color_pair(color_palette_size+1))
         stdscr.refresh()
         key = stdscr.getkey()
         match key:
@@ -146,10 +151,12 @@ for frame in ImageSequence.Iterator(source_image):
     bubble_mask = Image.new("RGBA", (1000, 1000), (255, 255, 255, 255))
     bubble_mask_drawable = ImageDraw.Draw(bubble_mask)
     # Make it better responsive
+    # Calculate the angle
+    pointer_angle = 270 + math.degrees(math.atan((pointed_position[2]-pointed_position[0])/pointed_position[1]))
     bubble_mask_drawable.pieslice(xy=(
-        0, 0, 1000*pointed_position[0]*2, 1000*pointed_position[1]*2), start=270, end=280, fill=(255, 255, 255, 0))
+        -1000+1000*pointed_position[0], -1000+1000*pointed_position[1], 1000+1000*pointed_position[0], 1000+1000*pointed_position[1]), start=pointer_angle-5, end=pointer_angle+5, fill=(255, 255, 255, 0))
     bubble_mask_drawable.ellipse(
-        xy=(-500, -1000, 1500, 200*pointed_position[1]), fill=(255, 255, 255, 0))
+        xy=(-500, -1000, 1500, 1000*pointed_position[3]), fill=(255, 255, 255, 0))
     bubble_mask = bubble_mask.resize(
         (source_image.width, source_image.height), resample=Image.Resampling.NEAREST)
     transparent = Image.new(
