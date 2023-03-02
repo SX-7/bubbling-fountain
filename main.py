@@ -90,6 +90,7 @@ def main(stdscr):
     # Repeat it for direction (along top line), and height
     position_set = False
     director_position_x = int((thumbnail_array.shape[1]-1)/2)
+    director_position_y = int(pointed_position[1]*(thumbnail_array.shape[0]-2)/2)
     while not position_set:
         stdscr.clear()
         for iterator_x in range(thumbnail_array.shape[0]-1):
@@ -105,6 +106,9 @@ def main(stdscr):
         for current_marker_offset_vector in marker_positions:
             stdscr.addstr(int(current_marker_offset_vector[0]), int(current_marker_offset_vector[1]+director_position_x), "X",
                       curses.color_pair(color_palette_size+1))
+        # now draw horizontal line for speechbubble height
+        for line_x in range(thumbnail_array.shape[1]-1):
+            stdscr.addstr(director_position_y, line_x, "X",curses.color_pair(color_palette_size+1))
         stdscr.refresh()
         key = stdscr.getkey()
         match key:
@@ -114,9 +118,17 @@ def main(stdscr):
             case "KEY_RIGHT":
                 if not director_position_x == thumbnail_array.shape[1]-2:
                     director_position_x = director_position_x+1
+            case "KEY_UP":
+                if not director_position_y == 0:
+                    director_position_y = director_position_y-1
+            case "KEY_DOWN":
+                if not director_position_y == int(pointed_position[1]*(thumbnail_array.shape[0]-2)):
+                    director_position_y = director_position_y+1
             case " ":
                 pointed_position.append(
                     director_position_x/(thumbnail_array.shape[1]-2))
+                pointed_position.append(
+                    director_position_y/(thumbnail_array.shape[0]-2))
                 position_set = True
             case _:
                 pass
