@@ -54,7 +54,7 @@ def main(stdscr):
     cursor_position_y = int((thumbnail_array.shape[0]-1)/2)
     cursor_position_x = int((thumbnail_array.shape[1]-1)/2)
     while not position_set:
-        stdscr.clear()
+        stdscr.erase()
         # Draw image - yeah, I know the x and y are inverted
         for iterator_x in range(thumbnail_array.shape[0]-1):
             for iterator_y in range(thumbnail_array.shape[1]-1):
@@ -63,7 +63,6 @@ def main(stdscr):
         # Draw cursor
         stdscr.addstr(cursor_position_y, cursor_position_x, "X",
                       curses.color_pair(color_palette_size+1))
-        stdscr.refresh()
         # Get command
         key = stdscr.getkey()
         # Bleeding edge technology - limit at borders
@@ -93,8 +92,8 @@ def main(stdscr):
     director_position_x = int((thumbnail_array.shape[1]-1)/2)
     director_position_y = int(
         pointed_position[1]*(thumbnail_array.shape[0]-2)/2)
-    while not position_set:
-        stdscr.clear()
+    while not position_set: 
+        stdscr.erase()
         for iterator_x in range(thumbnail_array.shape[0]-1):
             for iterator_y in range(thumbnail_array.shape[1]-1):
                 stdscr.addstr(iterator_x, iterator_y, "#", curses.color_pair(
