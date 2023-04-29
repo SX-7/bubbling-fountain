@@ -10,13 +10,6 @@ import curses
 import numpy
 try:
     source_image = Image.open(BytesIO(requests.get(sys.argv[1]).content))
-try:
-    save_location = str(sys.argv[2])
-except:
-    # this means it just wasn't provided
-    # if user does an oopsie, we don't care, just throw
-    # maybe something to improve upon
-    save_location = "res.gif"
 except IndexError:
     print("URL adress has not been provided")
     sys.exit(-1)
@@ -26,6 +19,14 @@ except UnidentifiedImageError:
 except:
     print("Error while parsing URL, or retrieving content")
     sys.exit(-3)
+
+try:
+    save_location = str(sys.argv[2])
+except:
+    # this means it just wasn't provided
+    # if user does an oopsie, we don't care, just throw
+    # maybe something to improve upon
+    save_location = "res.gif"
 
 pointed_position = []
 
