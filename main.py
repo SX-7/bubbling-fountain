@@ -10,7 +10,13 @@ import curses
 import numpy
 try:
     source_image = Image.open(BytesIO(requests.get(sys.argv[1]).content))
-
+try:
+    save_location = str(sys.argv[2])
+except:
+    # this means it just wasn't provided
+    # if user does an oopsie, we don't care, just throw
+    # maybe something to improve upon
+    save_location = "res.gif"
 except IndexError:
     print("URL adress has not been provided")
     sys.exit(-1)
@@ -167,5 +173,5 @@ for frame in ImageSequence.Iterator(source_image):
         frame_length.append(0)
 
 # how to handle output? termux's an issue
-output_frames[0].save("res.gif", save_all=True, append_images=output_frames[1:],
+output_frames[0].save(save_location, save_all=True, append_images=output_frames[1:],
                       loop=0, duration=frame_length, optimize=True, disposal=2)
