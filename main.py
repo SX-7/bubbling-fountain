@@ -9,10 +9,12 @@ from PIL import ImageSequence
 import curses
 import numpy
 
+# Source img
 try:
     source_image = Image.open(BytesIO(requests.get(sys.argv[1]).content))
 except IndexError:
     print("URL adress has not been provided")
+    print("Syntax is python3 main.py SOURCE [OUT_FILE]")
     sys.exit(-1)
 except UnidentifiedImageError:
     print("File at the URL adress is not an image file")
@@ -95,6 +97,24 @@ def main(stdscr):
                 pointed_position.append(
                     cursor_position_y/(thumbnail_array.shape[0]-2))
                 position_set = True
+            case "KEY_RESIZE":
+                thumbnail = source_image.resize(
+                    (stdscr.getmaxyx()[1], stdscr.getmaxyx()[0])).quantize(color_palette_size-1)
+                # ensuring that we don't create unnecesary amount of colors
+                color_palette_size = len(thumbnail.getcolors())
+                thumbnail_array = numpy.array(thumbnail)
+                # initialize colors at positions 1-(COLORS-2) in curses
+                fixed_palette = thumbnail.getpalette()[0:3*color_palette_size]
+                for iterator in range(0, color_palette_size*3, 3):
+                    palette_iterator = int((iterator/3)+1)
+                    curses.init_color(palette_iterator, int(fixed_palette[iterator]/255*1000), int(
+                        fixed_palette[iterator+1]/255*1000), int(fixed_palette[iterator+2]/255*1000))
+                    curses.init_pair(palette_iterator, palette_iterator, palette_iterator)
+                # cursor color set
+                curses.init_color(color_palette_size+1, 1000, 0, 0)
+                curses.init_color(color_palette_size+2, 0, 1000, 0)
+                curses.init_pair(color_palette_size+1,
+                                color_palette_size+1, color_palette_size+2)
             case _:
                 pass
     # Repeat it for direction (along top line), and height
@@ -144,6 +164,24 @@ def main(stdscr):
                 pointed_position.append(
                     director_position_y/(thumbnail_array.shape[0]-2))
                 position_set = True
+            case "KEY_RESIZE":
+                thumbnail = source_image.resize(
+                    (stdscr.getmaxyx()[1], stdscr.getmaxyx()[0])).quantize(color_palette_size-1)
+                # ensuring that we don't create unnecesary amount of colors
+                color_palette_size = len(thumbnail.getcolors())
+                thumbnail_array = numpy.array(thumbnail)
+                # initialize colors at positions 1-(COLORS-2) in curses
+                fixed_palette = thumbnail.getpalette()[0:3*color_palette_size]
+                for iterator in range(0, color_palette_size*3, 3):
+                    palette_iterator = int((iterator/3)+1)
+                    curses.init_color(palette_iterator, int(fixed_palette[iterator]/255*1000), int(
+                        fixed_palette[iterator+1]/255*1000), int(fixed_palette[iterator+2]/255*1000))
+                    curses.init_pair(palette_iterator, palette_iterator, palette_iterator)
+                # cursor color set
+                curses.init_color(color_palette_size+1, 1000, 0, 0)
+                curses.init_color(color_palette_size+2, 0, 1000, 0)
+                curses.init_pair(color_palette_size+1,
+                                color_palette_size+1, color_palette_size+2)
             case _:
                 pass
 
@@ -176,6 +214,6 @@ for frame in ImageSequence.Iterator(source_image):
     except:
         frame_length.append(0)
 
-# how to handle output? termux's an issue
+# how to handle output?gi termux's an issue
 output_frames[0].save(save_location, save_all=True, append_images=output_frames[1:],
                       loop=0, duration=frame_length, optimize=True, disposal=2)
