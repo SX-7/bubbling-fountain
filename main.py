@@ -8,6 +8,7 @@ from PIL import UnidentifiedImageError
 from PIL import ImageSequence
 import curses
 import numpy
+
 try:
     source_image = Image.open(BytesIO(requests.get(sys.argv[1]).content))
 except IndexError:
@@ -36,10 +37,11 @@ def main(stdscr):
     curses.curs_set(0)
     # 0th one is unchangeable, last one is reserved for marker
     color_palette_size = curses.COLORS-3
+    
     stdscr.clear()
     stdscr.refresh()
     thumbnail = source_image.resize(
-        (stdscr.getmaxyx()[1], stdscr.getmaxyx()[0])).quantize(color_palette_size)
+        (stdscr.getmaxyx()[1], stdscr.getmaxyx()[0])).quantize(color_palette_size-1)
     # ensuring that we don't create unnecesary amount of colors
     color_palette_size = len(thumbnail.getcolors())
     thumbnail_array = numpy.array(thumbnail)
@@ -47,6 +49,7 @@ def main(stdscr):
     fixed_palette = thumbnail.getpalette()[0:3*color_palette_size]
     for iterator in range(0, color_palette_size*3, 3):
         palette_iterator = int((iterator/3)+1)
+        # why?
         curses.init_color(palette_iterator, int(fixed_palette[iterator]/255*1000), int(
             fixed_palette[iterator+1]/255*1000), int(fixed_palette[iterator+2]/255*1000))
         curses.init_pair(palette_iterator, palette_iterator, palette_iterator)
@@ -65,7 +68,7 @@ def main(stdscr):
         # Draw image - yeah, I know the x and y are inverted
         for iterator_x in range(thumbnail_array.shape[0]-1):
             for iterator_y in range(thumbnail_array.shape[1]-1):
-                stdscr.addstr(iterator_x, iterator_y, "#", curses.color_pair(
+                stdscr.addstr(iterator_x, iterator_y, " ", curses.color_pair(
                     thumbnail_array[iterator_x, iterator_y]+1))
         # Draw cursor
         stdscr.addstr(cursor_position_y, cursor_position_x, "X",
@@ -103,7 +106,7 @@ def main(stdscr):
         stdscr.erase()
         for iterator_x in range(thumbnail_array.shape[0]-1):
             for iterator_y in range(thumbnail_array.shape[1]-1):
-                stdscr.addstr(iterator_x, iterator_y, "#", curses.color_pair(
+                stdscr.addstr(iterator_x, iterator_y, " ", curses.color_pair(
                     thumbnail_array[iterator_x, iterator_y]+1))
         # we have to draw the cursor *with* the line outgoing from the previous pos
         # make a list of coordinates that'll be used to draw, arbitrairly 10
